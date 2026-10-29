@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+.venv/
+openbench.db
+.env
+.DS_Store
