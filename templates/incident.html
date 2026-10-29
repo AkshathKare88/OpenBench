@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Report incident{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ url_for('dashboard') }}">← Back to dashboard</a>
+<section class="form-layout"><div><div class="eyebrow">TRUST & SAFETY</div><h1>Report an incident.</h1><p class="muted">A clear report helps the owner review the situation and decide the next step.</p><div class="notice warning">Reports may temporarily mark damaged resources unavailable. Human review is required before restoration.</div></div>
+<form class="panel stack-form" method="post">
+<div class="resource-summary"><strong>{{ booking.resource_name }}</strong><span class="status-pill status-{{ booking.status }}">{{ booking.status|replace('_',' ')|title }}</span></div>
+<label>Incident type<select name="incident_type"><option value="damage">Damage or fault</option><option value="delay">Late return</option><option value="scheduling">Scheduling conflict</option><option value="safety">Safety concern</option><option value="other">Other</option></select></label>
+<label>What happened?<textarea name="description" rows="5" required placeholder="Describe what you observed. Avoid assumptions about blame."></textarea></label>
+<button class="button primary full" type="submit">Submit incident report →</button>
+</form></section>
+{% endblock %}

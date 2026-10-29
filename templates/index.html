@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Explore resources{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="eyebrow"><span class="dot"></span> CAMPUS RESOURCE SHARING</div>
+  <h1>Great resources.<br><span class="gradient-text">Shared responsibly.</span></h1>
+  <p class="hero-copy">Discover equipment and spaces, check the requirements, and request access through a safer, fairer booking workflow.</p>
+  <div class="hero-actions"><a class="button primary" href="#resources">Explore resources <span>↘</span></a><a class="button secondary" href="{{ url_for('login') }}">Open demo dashboard</a></div>
+  <div class="trust-strip"><span>✓ Eligibility-aware requests</span><span>✓ Owner approval</span><span>✓ Logged handovers</span></div>
+</section>
+<section id="resources" class="section-head">
+  <div><div class="eyebrow">THE RESOURCE CATALOGUE</div><h2>Find your next resource</h2><p class="muted">Fictional campus listings for demonstration.</p></div>
+  {% if user and user.role in ['owner','admin'] %}<a class="button primary" href="{{ url_for('new_resource') }}">＋ List a resource</a>{% endif %}
+</section>
+<div class="catalogue-tools">
+  <label class="catalogue-search"><span class="sr-only">Search resources</span><input id="resourceSearch" type="search" placeholder="Search by resource, category, or location…" autocomplete="off"></label>
+  <label class="catalogue-filter"><span class="sr-only">Filter by category</span><select id="categoryFilter"><option value="">All categories</option>{% for category in resources|map(attribute='category')|unique|sort %}<option value="{{ category|lower }}">{{ category }}</option>{% endfor %}</select></label>
+  <label class="catalogue-filter"><span class="sr-only">Filter by availability</span><select id="availabilityFilter"><option value="">Any status</option><option value="available">Available</option><option value="review">Needs review</option></select></label>
+</div>
+<div class="resource-grid" id="resourceGrid">
+{% for r in resources %}
+  <article class="resource-card" data-name="{{ r.name|lower }}" data-category="{{ r.category|lower }}" data-location="{{ r.location|lower }}" data-status="{{ 'available' if r.available else 'review' }}">
+    <div class="resource-art art-{{ loop.index }}"><span class="art-icon">{% if r.category == 'Electronics' %}⌁{% elif r.category == 'Fabrication' %}◈{% else %}▦{% endif %}</span><span class="art-label">{{ r.category }}</span></div>
+    <div class="card-body">
+      <div class="card-top"><span class="status-pill {{ 'available' if r.available else 'review' }}">{{ 'Available' if r.available else 'Needs review' }}</span><span class="small-muted">Resource #{{ r.id }}</span></div>
+      <h3>{{ r.name }}</h3><p class="card-description">{{ r.description }}</p>
+      <div class="meta-row"><span>⌖ {{ r.location }}</span></div>
+      <div class="requirements"><span class="shield">✓</span><span>{{ r.requirements }}</span></div>
+      <a class="card-link" href="{{ url_for('resource_detail', resource_id=r.id) }}">View resource <span>→</span></a>
+    </div>
+  </article>
+{% endfor %}
+</div>
+<p id="noResourcesMessage" class="empty-state" hidden>No resources match those filters. Try a different search.</p>
+<section class="value-row">
+  <div><span class="value-icon">01</span><h3>Check before you request</h3><p>Requirements are visible before a booking request is submitted.</p></div>
+  <div><span class="value-icon">02</span><h3>Owners stay in control</h3><p>Every request is reviewed by an authorized resource owner.</p></div>
+  <div><span class="value-icon">03</span><h3>Every handoff matters</h3><p>Condition reports and an activity history create accountability.</p></div>
+</section>
+<script>
+(() => {
+  const search = document.getElementById('resourceSearch');
+  const category = document.getElementById('categoryFilter');
+  const availability = document.getElementById('availabilityFilter');
+  const cards = [...document.querySelectorAll('.resource-card')];
+  const empty = document.getElementById('noResourcesMessage');
+  function filterResources() {
+    const q = search.value.trim().toLowerCase();
+    let visible = 0;
+    cards.forEach(card => {
+      const matchesText = [card.dataset.name, card.dataset.category, card.dataset.location].some(v => v.includes(q));
+      const matchesCategory = !category.value || card.dataset.category === category.value;
+      const matchesAvailability = !availability.value || card.dataset.status === availability.value;
+      const show = matchesText && matchesCategory && matchesAvailability;
+      card.hidden = !show;
+      if (show) visible++;
+    });
+    empty.hidden = visible !== 0;
+  }
+  [search, category, availability].forEach(control => control.addEventListener('input', filterResources));
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ resource.name }}{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ url_for('index') }}">← Back to catalogue</a>
+<section class="detail-layout">
+  <div class="detail-main">
+    <div class="detail-art"><span class="art-icon">{% if resource.category == 'Electronics' %}⌁{% elif resource.category == 'Fabrication' %}◈{% else %}▦{% endif %}</span><span class="art-label">{{ resource.category }}</span></div>
+    <div class="detail-title-row"><div><div class="eyebrow">RESOURCE #{{ resource.id }} · {{ resource.category|upper }}</div><h1>{{ resource.name }}</h1></div><span class="status-pill {{ 'available' if resource.available else 'review' }}">{{ 'Available' if resource.available else 'Needs review' }}</span></div>
+    <p class="detail-description">{{ resource.description }}</p>
+    <div class="detail-facts"><div><span>⌖</span><div><small>Location</small><strong>{{ resource.location }}</strong></div></div><div><span>◎</span><div><small>Resource owner</small><strong>{{ resource.owner_name }}</strong></div></div></div>
+    <div class="panel rules-panel"><div class="eyebrow">ACCESS REQUIREMENTS</div><h2>Before you request</h2><p>{{ resource.requirements }}</p><div class="eligibility {{ 'eligible' if eligible else 'not-eligible' if eligible == false else 'unknown' }}">{% if eligible is none %}Sign in to check your eligibility.{% elif eligible %}✓ Your demo profile meets the training requirement.{% else %}⚠ Your demo profile does not meet the required training. You cannot request this resource.{% endif %}</div></div>
+  </div>
+  <aside class="panel request-panel"><div class="eyebrow">REQUEST ACCESS</div><h2>Book this resource</h2><p class="muted small">Requests require owner approval. Submitting a request does not guarantee access.</p>
+  {% if user and user.role == 'student' and eligible and resource.available %}
+  <form method="post" action="{{ url_for('book_resource', resource_id=resource.id) }}" class="stack-form">
+    <label>Start time<input type="datetime-local" name="start_at" required></label>
+    <label>End time<input type="datetime-local" name="end_at" required></label>
+    <label>What will you use it for?<textarea name="purpose" rows="3" required placeholder="Briefly describe your project or intended use"></textarea></label>
+    <div class="notice">Fair-use rule: at most two active requests/bookings per student. Conflicting resource slots are blocked.</div>
+    <button class="button primary full" type="submit">Submit booking request →</button>
+  </form>
+  {% elif not user %}<a class="button primary full" href="{{ url_for('login') }}">Sign in to request</a>
+  {% elif user.role != 'student' %}<div class="notice">Switch to a student demo account to submit a booking request.</div>
+  {% elif not eligible %}<button class="button disabled full" disabled>Training requirement not met</button>
+  {% else %}<div class="notice warning">This resource is unavailable pending review.</div>{% endif %}
+  </aside>
+</section>
+{% endblock %}

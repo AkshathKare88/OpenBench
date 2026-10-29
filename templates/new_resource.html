@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}List a resource{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ url_for('dashboard') }}">← Back to dashboard</a>
+<section class="form-layout"><div><div class="eyebrow">GROW THE CATALOGUE</div><h1>List a resource.</h1><p class="muted">Make an underused resource discoverable while keeping its conditions clear.</p><div class="notice">Only list fictional demo resources or assets you are authorized to share.</div></div>
+<form class="panel stack-form" method="post">
+<label>Resource name<input name="name" required placeholder="e.g. Digital oscilloscope"></label>
+<label>Category<input name="category" required placeholder="e.g. Electronics"></label>
+<label>Location<input name="location" required placeholder="e.g. Engineering Lab A"></label>
+<label>Description<textarea name="description" rows="3" required placeholder="What can users do with this resource?"></textarea></label>
+<label>Access requirements<textarea name="requirements" rows="2" placeholder="Training, supervision, safety rules..."></textarea></label>
+<label>Required training<select name="required_training"><option value="none">No specialist training</option><option value="electronics">Electronics-lab training</option><option value="3d_printer">3D-printer training</option></select></label>
+<button class="button primary full" type="submit">Publish resource →</button>
+</form></section>
+{% endblock %}

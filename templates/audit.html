@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Trust and audit{% endblock %}
+{% block content %}
+<section class="dashboard-hero"><div><div class="eyebrow">ACCOUNTABILITY CENTRE</div><h1>Trust & audit.</h1><p class="muted">Review the recorded actions and open incidents for the demo environment.</p></div></section>
+<section class="panel table-panel"><div class="panel-heading"><div><div class="eyebrow">REVIEW QUEUE</div><h2>Incident reports</h2></div></div>
+{% if incidents %}
+<div class="booking-list">{% for i in incidents %}<article class="booking-item"><div class="booking-main"><div class="booking-icon">!</div><div><h3>{{ i.resource_name }} · {{ i.incident_type|title }}</h3><p>{{ i.description }}</p><p class="small-muted">Reported by {{ i.reporter_name }} · {{ i.created_at }}</p>{% if i.resolution %}<p class="small">Resolution: {{ i.resolution }}</p>{% endif %}</div></div><div class="booking-actions"><span class="status-pill status-{{ i.status }}">{{ i.status|title }}</span>{% if i.status == 'open' %}<form method="post" action="{{ url_for('resolve_incident', incident_id=i.id) }}" class="decision-form"><input name="resolution" placeholder="Resolution note" required><button class="mini-button approve" type="submit">Resolve</button></form>{% endif %}</div></article>{% endfor %}</div>
+{% else %}<div class="empty-state"><h3>No incidents reported</h3><p>When a user reports a problem, it will appear here for review.</p></div>{% endif %}
+</section>
+<section class="panel table-panel"><div class="panel-heading"><div><div class="eyebrow">AUDIT TRAIL</div><h2>Recent activity</h2></div><span class="small-muted">Newest first · up to 200 events</span></div>
+{% if events %}<div class="audit-list">{% for e in events %}<div class="audit-row"><div class="audit-dot"></div><div class="audit-copy"><strong>{{ e.action|replace('_',' ')|title }}</strong><p>{{ e.actor }} · {{ e.entity_type|title }} #{{ e.entity_id }}{% if e.details %} · {{ e.details }}{% endif %}</p></div><time>{{ e.created_at }}</time></div>{% endfor %}</div>{% else %}<p class="muted">No events yet.</p>{% endif %}
+</section>
+{% endblock %}

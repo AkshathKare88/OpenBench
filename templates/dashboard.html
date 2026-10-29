@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<section class="dashboard-hero">
+  <div><div class="eyebrow">YOUR WORKSPACE</div><h1>Hello, {{ user.name.split(' ')[0] }}.</h1><p class="muted">Here's the current state of your resource-sharing activity.</p></div>
+  {% if user.role in ['owner','admin'] %}<a class="button primary" href="{{ url_for('new_resource') }}">＋ List a resource</a>{% endif %}
+</section>
+<div class="stats-grid">
+  <div class="stat-card"><span class="stat-label">Visible resources</span><strong>{{ resources|length }}</strong><span class="stat-foot">Across the demo campus</span></div>
+  <div class="stat-card"><span class="stat-label">Your bookings / requests</span><strong>{{ bookings|length }}</strong><span class="stat-foot">Persistent transaction records</span></div>
+  <div class="stat-card"><span class="stat-label">Your role</span><strong class="role-stat">{{ user.role|title }}</strong><span class="stat-foot">Role-based demo experience</span></div>
+</div>
+<section class="panel table-panel">
+  <div class="panel-heading"><div><div class="eyebrow">TRANSACTION CENTRE</div><h2>{% if user.role == 'owner' %}Requests for your resources{% elif user.role == 'admin' %}All booking activity{% else %}Your bookings{% endif %}</h2></div><a class="text-link" href="{{ url_for('index') }}">Explore catalogue →</a></div>
+  {% if bookings %}
+  <div class="booking-list">
+  {% for b in bookings %}
+    <article class="booking-item">
+      <div class="booking-main"><div class="booking-icon">▦</div><div><h3>{{ b.resource_name }}</h3><p class="muted small">{{ b.start_at }} → {{ b.end_at }}</p><p class="small">{{ b.purpose }}</p>{% if user.role in ['owner','admin'] %}<p class="small-muted">Requested by {{ b.user_name }}</p>{% endif %}</div></div>
+      <div class="booking-actions"><span class="status-pill status-{{ b.status }}">{{ b.status|replace('_',' ')|title }}</span>
+      {% if user.role in ['owner','admin'] and b.status == 'pending' %}
+        <form method="post" action="{{ url_for('booking_decision', booking_id=b.id) }}" class="decision-form"><input name="reason" placeholder="Decision note (optional)"><button class="mini-button approve" name="decision" value="approved">Approve</button><button class="mini-button wait" name="decision" value="waitlisted">Waitlist</button><button class="mini-button reject" name="decision" value="rejected">Reject</button></form>
+      {% elif user.role == 'student' and b.status == 'approved' %}
+        <form method="post" action="{{ url_for('handoff', booking_id=b.id) }}" class="handoff-form"><label>Initial condition<select name="condition"><option>Good</option><option>Worn</option><option>Needs review</option></select></label><input name="notes" placeholder="Handover notes"><button class="mini-button approve" name="action" value="checkin">Check in</button></form>
+      {% elif user.role == 'student' and b.status == 'checked_in' %}
+        <form method="post" action="{{ url_for('handoff', booking_id=b.id) }}" class="handoff-form"><label>Return condition<select name="condition"><option>Good</option><option>Worn</option><option>Damaged</option><option>Faulty</option></select></label><input name="notes" placeholder="Return notes"><button class="mini-button approve" name="action" value="checkout">Record return</button></form>
+      {% elif user.role == 'student' and b.status in ['returned','rejected','waitlisted'] %}
+        <span class="small-muted">{{ b.decision_reason or ('Transaction closed' if b.status == 'returned' else 'See owner for next steps') }}</span>
+      {% endif %}
+      {% if b.status in ['checked_in','returned','approved'] %}<a class="text-link small" href="{{ url_for('report_incident', booking_id=b.id) }}">Report an incident</a>{% endif %}
+      </div>
+    </article>
+  {% endfor %}
+  </div>
+  {% else %}
+    <div class="empty-state"><div class="empty-icon">↗</div><h3>No transactions yet</h3><p>Explore the catalogue and request a resource to start your first sharing journey.</p><a class="button primary" href="{{ url_for('index') }}">Explore resources</a></div>
+  {% endif %}
+</section>
+{% if user.role in ['owner','admin'] %}
+<section class="panel table-panel">
+  <div class="panel-heading"><div><div class="eyebrow">RESOURCE MANAGEMENT</div><h2>Resource inventory</h2></div></div>
+  <div class="inventory-list">{% for r in resources %}<div class="inventory-row"><div><strong>{{ r.name }}</strong><p class="small-muted">{{ r.location }} · {{ r.category }}</p></div><span class="status-pill {{ 'available' if r.available else 'review' }}">{{ 'Available' if r.available else 'Needs review' }}</span><a class="text-link" href="{{ url_for('resource_detail', resource_id=r.id) }}">View →</a></div>{% endfor %}</div>
+</section>
+{% endif %}
+{% endblock %}

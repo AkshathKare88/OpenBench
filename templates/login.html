@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Demo sign in{% endblock %}
+{% block content %}
+<section class="auth-layout">
+  <div class="auth-intro"><div class="eyebrow">INTERACTIVE DEMO</div><h1>Step into<br><span class="gradient-text">OpenBench.</span></h1><p>Choose a fictional demo account to explore the application from different perspectives. No password or real institutional login is used in this prototype.</p><div class="notice"><strong>Demo only</strong><br>These accounts are fictional and should not be used for real access decisions.</div></div>
+  <form class="panel login-panel" method="post">
+    <div class="eyebrow">SELECT A ROLE</div><h2>Welcome back</h2><p class="muted">Pick a demo identity to continue.</p>
+    {% for u in users %}
+    <label class="account-option"><input type="radio" name="user_id" value="{{ u.id }}" {% if loop.first %}checked{% endif %}><span class="account-avatar">{{ u.name[0] }}</span><span class="account-info"><strong>{{ u.name }}</strong><small>{{ u.role|title }}{% if u.role == 'student' and u.trained_electronics %} · Electronics trained{% elif u.role == 'student' %} · No specialist training{% endif %}</small></span><span class="radio-dot"></span></label>
+    {% endfor %}
+    <button class="button primary full" type="submit">Continue to dashboard →</button>
+  </form>
+</section>
+{% endblock %}
